@@ -64,8 +64,12 @@ GameBoard.prototype.fillElement = function(turn, x, y) {
 	var yPos = this.height * (((y + 1)  * .3) - .1);
 	if(turn == 0) {
 		this.drawCross(xPos, yPos);
+		if (this.didWin(turn))
+			console.debug("Player X Wins");
 	} else {
 		this.drawCircle(xPos, yPos);
+		if (this.didWin(turn))
+			console.debug("Player O Wins");
 	}
 	this.turn ++;
 	if(this.turn == 2) this.turn = 0;
@@ -82,4 +86,53 @@ GameBoard.prototype.drawCross = function(x,y) {
 	console.log(pathString);
 	this.crosses.push(this.paper.path(pathString).attr({"stroke-width" : radi * .5, "stroke" : "#A00"}));
 	this.crosses.push(this.paper.path(pathString2).attr({"stroke-width" : radi * .5, "stroke" : "#A00"}));
+}
+
+GameBoard.prototype.didWin = function(turn) {	
+	// Check top left
+	if (this.cells[0][0] == turn) {
+		// Check top row
+		if (this.cells[0][1] == turn && this.cells[0][2] == turn)
+			return true;
+		// Check left column
+		if (this.cells[1][0] == turn && this.cells[2][0] == turn)
+			return true;
+		// Check top left to bot right diagonal
+		if (this.cells[1][1] == turn && this.cells[2][2] == turn)
+			return true;
+	}
+	
+	// Check top center
+	if (this.cells[0][1] == turn) {
+		// Check center column
+		if (this.cells[1][1] == turn && this.cells[2][1] == turn)
+			return true;
+	}
+	
+	// Check top right
+	if (this.cells[0][2] == turn) {
+		// Check right column
+		if (this.cells[1][2] == turn && this.cells[2][2] == turn)
+			return true;
+		// Check top right to bot left diagonal
+		if (this.cells[1][1] == turn && this.cells[2][0] == turn)
+			return true;
+	}
+	
+	// Check center left
+	if (this.cells[1][0] == turn) {
+		// Check center row
+		if (this.cells[1][1] == turn && this.cells[1][2] == turn)
+			return true;
+	}
+	
+	// Check bot left
+	if (this.cells[2][0] == turn) {
+		// Check bot row
+		if (this.cells[2][1] == turn && this.cells[2][2] == turn)
+			return true;
+	}
+	
+	// No win
+	return false;
 }
