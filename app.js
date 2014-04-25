@@ -7,6 +7,7 @@ $(function() {
 
 function GameBoard() {
 	this.cells = [[-1, -1, -1],[-1, -1, -1],[-1, -1, -1]];
+	this.playing = true;
 	this.turn = 0;
 	this.paper = null;
 	this.width = $(document).width();
@@ -44,7 +45,7 @@ GameBoard.prototype.createCells = function() {
 	for(var i = 0; i < 3; i++) {
 		for(var g = 0; g < 3; g++) {
 			var xPos =  this.width * (((g + 1) * .3) - .1);
-			var yPos = this.height * (((i + 1)  * .3) - .1);
+			var yPos = this.height * (((i + 1) * .3) - .1);
 			this.createCell(xPos, yPos, g, i);
 		}
 	}
@@ -58,21 +59,35 @@ GameBoard.prototype.createCell = function(x, y, cellArrayX, cellArrayY) {
 	});
 }
 
+GameBoard.prototype.aiMakeMove = function() {
+	var ThisGameBoard = this;
+	var cellArrayX;
+	var cellArrayY;
+	
+	do {
+		cellArrayX = Math.floor(Math.random() * 3);
+		cellArrayY = Math.floor(Math.random() * 3);
+	} while (this.cells[cellArrayX][cellArrayY] != -1);
+	
+	ThisGameBoard.fillElement(ThisGameBoard.turn, cellArrayX, cellArrayY);
+}
+
 GameBoard.prototype.fillElement = function(turn, x, y) {
 	this.cells[x][y] = turn;
 	var xPos =  this.width * (((x + 1) * .3) - .1);
-	var yPos = this.height * (((y + 1)  * .3) - .1);
+	var yPos = this.height * (((y + 1) * .3) - .1);
 	if(turn == 0) {
 		this.drawCross(xPos, yPos);
 		if (this.didWin(turn))
-			console.debug("Player X Wins");
+			this.endGame('X');
 	} else {
 		this.drawCircle(xPos, yPos);
 		if (this.didWin(turn))
-			console.debug("Player O Wins");
+			this.endGame('O');
 	}
 	this.turn ++;
 	if(this.turn == 2) this.turn = 0;
+	if(this.turn == 1 && this.playing) this.aiMakeMove();
 }
 
 GameBoard.prototype.drawCircle = function(x,y) {
@@ -135,4 +150,9 @@ GameBoard.prototype.didWin = function(turn) {
 	
 	// No win
 	return false;
+}
+
+GameBoard.prototype.endGame = function(shape) {
+	console.debug("Player ", shape, " Wins!");
+	this.playing = false;
 }
