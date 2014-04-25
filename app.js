@@ -7,6 +7,8 @@ $(function() {
 
 function GameBoard() {
 	this.cells = [[-1, -1, -1],[-1, -1, -1],[-1, -1, -1]];
+	this.clickHandler = new Array(3);
+	this.numPlayers = 0;
 	this.playing = true;
 	this.turn = 0;
 	this.paper = null;
@@ -20,6 +22,10 @@ function GameBoard() {
 }
 
 GameBoard.prototype.drawBoard = function() {
+	for(var i = 0; i < this.clickHandler.length; i++) {
+		this.clickHandler[i] = new Array(3);
+	}
+	
 	this.paper = Raphael(0, 0, this.width, this.height);
 	this.lines = [];
 	this.lines.push(this.paper.rect(this.width * .333 - this.lineWidth/2, 0, this.lineWidth, this.height));
@@ -53,7 +59,7 @@ GameBoard.prototype.createCells = function() {
 
 GameBoard.prototype.createCell = function(x, y, cellArrayX, cellArrayY) {
 	var ThisGameBoard = this;
-	var cell = this.paper.circle(parseInt(x), parseInt(y), parseInt(this.width * .028 + this.height * .03)).attr({"stroke-width" : "0", "fill" : "#CCC", "cursor" : "pointer"}).mousedown(function() {
+	this.clickHandler[cellArrayX][cellArrayY] = this.paper.circle(parseInt(x), parseInt(y), parseInt(this.width * .028 + this.height * .03)).attr({"stroke-width" : "0", "fill" : "#CCC", "cursor" : "pointer"}).mousedown(function() {
 		ThisGameBoard.fillElement(ThisGameBoard.turn, cellArrayX, cellArrayY);
 		this.remove();
 	});
@@ -70,6 +76,7 @@ GameBoard.prototype.aiMakeMove = function() {
 	} while (this.cells[cellArrayX][cellArrayY] != -1);
 	
 	ThisGameBoard.fillElement(ThisGameBoard.turn, cellArrayX, cellArrayY);
+	this.clickHandler[cellArrayX][cellArrayY].remove();
 }
 
 GameBoard.prototype.fillElement = function(turn, x, y) {
