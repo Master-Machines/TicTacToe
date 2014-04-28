@@ -20,7 +20,7 @@ function GameBoard() {
 	this.crosses = [];
 	this.cellSpaces = [];
 	this.drawBoard();
-	this.dumbAIMakeMove();
+	//this.dumbAIMakeMove();
 }
 
 GameBoard.prototype.drawBoard = function() {
@@ -69,16 +69,61 @@ GameBoard.prototype.createCell = function(x, y, cellArrayX, cellArrayY) {
 	});
 }
 
+GameBoard.prototype.stringStartsWith = function(element, str) {
+	console.debug("e ", element);
+	console.debug("s ", str);
+	return element.slice(0, str.length) == str;
+}
+
 GameBoard.prototype.smartAIMakeMove = function() {
 	var ThisGameBoard = this;
 	var cellArrayX;
 	var cellArrayY;
 	
 	var possibleGames = [];
+	var nextMove = wins[this.gameMoves];
 	
-	for (var i = 0; i < winGames.length; i++) {
-		
+	nextMove = nextMove.slice(this.gameMoves.length, this.gameMoves.length + 1);
+	
+	console.debug("next move: ", nextMove, ', ', wins[this.gameMoves]);
+	
+	cellArrayX = Math.floor(parseInt(nextMove) % 3);
+	cellArrayY = Math.floor(parseInt(nextMove) / 3);
+	
+	console.debug("cells: ", cellArrayX, ', ', cellArrayY);
+	
+	/*for (var i = 0; i < winGames.length; i++) {
+		while (!this.stringStartsWith(winGames[i], this.gameMoves))
+			winGames.splice(i, 1);
+		if (this.stringStartsWith(winGames[i], this.gameMoves))
+			possibleGames.push(winGames[i]);
 	}
+	
+	if (possibleGames.length == 0) {
+		for (var i = 0; i < drawGames.length; i++) {
+			while(!this.stringStartsWith(drawGames[i], this.gameMoves))
+				drawGames.splice(i, 1);
+			if (this.stringStartsWith(drawGames[i], this.gameMoves))
+				possibleGames.push(drawGames[i]);
+		}
+	}
+	
+	if (possibleGames.length > 0) {
+		for (var i = 0; i < possibleGames.length; i++) {
+			if (possibleGames[i].length > bestMatch.length)
+				bestMatch = possibleGames[i];
+		}
+		
+		cell = bestMatch.charCodeAt(bestMatch.length - 1);
+		
+		cellArrayX = Math.floor(cell / 3);
+		cellArrayY = Math.floor(cell % 3);
+	} else {
+		do {
+			cellArrayX = Math.floor(Math.random() * 3);
+			cellArrayY = Math.floor(Math.random() * 3);
+		} while (this.cells[cellArrayX][cellArrayY] != -1);
+	}*/
 	
 	ThisGameBoard.fillElement(ThisGameBoard.turn, cellArrayX, cellArrayY);
 	this.clickHandler[cellArrayX][cellArrayY].remove();
@@ -103,8 +148,7 @@ GameBoard.prototype.fillElement = function(turn, x, y) {
 	var xPos =  this.width * (((x + 1) * .3) - .1);
 	var yPos = this.height * (((y + 1) * .3) - .1);
 	
-	this.gameMoves += x * 3 + y;
-	console.debug(this.gameMoves);
+	this.gameMoves += y * 3 + x;
 	
 	if(turn == 0) {
 		this.drawCross(xPos, yPos);
@@ -120,7 +164,7 @@ GameBoard.prototype.fillElement = function(turn, x, y) {
 	if(this.turn == 2 && this.playing)
 	{ 
 		this.turn = 0;
-		this.dumbAIMakeMove()
+		//this.dumbAIMakeMove()
 	}
 	if(this.turn == 1 && this.playing) this.smartAIMakeMove();
 }
