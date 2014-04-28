@@ -15,16 +15,20 @@ function GameBoard() {
 	this.width = $(document).width();
 	this.height = $(document).height();
 	this.lineWidth = this.height * .015 + this.width * .015;
+	this.gameMoves = "";
 	this.circles = [];
 	this.crosses = [];
 	this.cellSpaces = [];
 	this.drawBoard();
+	this.dumbAIMakeMove();
 }
 
 GameBoard.prototype.drawBoard = function() {
 	for(var i = 0; i < this.clickHandler.length; i++) {
 		this.clickHandler[i] = new Array(3);
 	}
+	
+	this.gameMoves = "";
 	
 	this.paper = Raphael(0, 0, this.width, this.height);
 	this.lines = [];
@@ -65,7 +69,22 @@ GameBoard.prototype.createCell = function(x, y, cellArrayX, cellArrayY) {
 	});
 }
 
-GameBoard.prototype.aiMakeMove = function() {
+GameBoard.prototype.smartAIMakeMove = function() {
+	var ThisGameBoard = this;
+	var cellArrayX;
+	var cellArrayY;
+	
+	var possibleGames = [];
+	
+	for (var i = 0; i < winGames.length; i++) {
+		
+	}
+	
+	ThisGameBoard.fillElement(ThisGameBoard.turn, cellArrayX, cellArrayY);
+	this.clickHandler[cellArrayX][cellArrayY].remove();
+}
+
+GameBoard.prototype.dumbAIMakeMove = function() {
 	var ThisGameBoard = this;
 	var cellArrayX;
 	var cellArrayY;
@@ -83,6 +102,10 @@ GameBoard.prototype.fillElement = function(turn, x, y) {
 	this.cells[x][y] = turn;
 	var xPos =  this.width * (((x + 1) * .3) - .1);
 	var yPos = this.height * (((y + 1) * .3) - .1);
+	
+	this.gameMoves += x * 3 + y;
+	console.debug(this.gameMoves);
+	
 	if(turn == 0) {
 		this.drawCross(xPos, yPos);
 		if (this.didWin(turn))
@@ -92,9 +115,14 @@ GameBoard.prototype.fillElement = function(turn, x, y) {
 		if (this.didWin(turn))
 			this.endGame('O');
 	}
+	
 	this.turn ++;
-	if(this.turn == 2) this.turn = 0;
-	if(this.turn == 1 && this.playing) this.aiMakeMove();
+	if(this.turn == 2 && this.playing)
+	{ 
+		this.turn = 0;
+		this.dumbAIMakeMove()
+	}
+	if(this.turn == 1 && this.playing) this.smartAIMakeMove();
 }
 
 GameBoard.prototype.drawCircle = function(x,y) {
@@ -155,8 +183,27 @@ GameBoard.prototype.didWin = function(turn) {
 			return true;
 	}
 	
+	this.checkTie();
+	
 	// No win
 	return false;
+}
+
+GameBoard.prototype.checkTie = function() {
+	var count = 0
+	
+	for(i = 0; i < 3; i++) {
+		for(j = 0; j < 3; j++) {
+			if (this.cells[i][j] != -1) {
+				count++;
+			}
+		}
+	}
+	if (count == 9)
+	{
+		console.debug("Tie");
+		this.playing = false;
+	}
 }
 
 GameBoard.prototype.endGame = function(shape) {
