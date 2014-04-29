@@ -80,53 +80,82 @@ GameBoard.prototype.smartAIMakeMove = function() {
 	var cellArrayX;
 	var cellArrayY;
 	
-	var possibleGames = [];
-	var nextMove = wins[this.gameMoves];
+	//var possibleGames = [];
+	//var nextMove = wins[this.gameMoves];
 	
-	nextMove = nextMove.slice(this.gameMoves.length, this.gameMoves.length + 1);
-	
-	console.debug("next move: ", nextMove, ', ', wins[this.gameMoves]);
-	
-	cellArrayX = Math.floor(parseInt(nextMove) % 3);
-	cellArrayY = Math.floor(parseInt(nextMove) / 3);
-	
-	console.debug("cells: ", cellArrayX, ', ', cellArrayY);
-	
-	/*for (var i = 0; i < winGames.length; i++) {
-		while (!this.stringStartsWith(winGames[i], this.gameMoves))
-			winGames.splice(i, 1);
-		if (this.stringStartsWith(winGames[i], this.gameMoves))
-			possibleGames.push(winGames[i]);
-	}
-	
-	if (possibleGames.length == 0) {
-		for (var i = 0; i < drawGames.length; i++) {
-			while(!this.stringStartsWith(drawGames[i], this.gameMoves))
-				drawGames.splice(i, 1);
-			if (this.stringStartsWith(drawGames[i], this.gameMoves))
-				possibleGames.push(drawGames[i]);
-		}
-	}
-	
-	if (possibleGames.length > 0) {
-		for (var i = 0; i < possibleGames.length; i++) {
-			if (possibleGames[i].length > bestMatch.length)
-				bestMatch = possibleGames[i];
-		}
-		
-		cell = bestMatch.charCodeAt(bestMatch.length - 1);
-		
-		cellArrayX = Math.floor(cell / 3);
-		cellArrayY = Math.floor(cell % 3);
+	if (this.gameMoves.length == 1 && (this.checkEdgeCenter() || this.checkCorner())) {
+		cellArrayX = 1;
+		cellArrayY = 1;
+	} else if (this.gameMoves.length == 3 && ((this.cells[0][0] == 0 && this.cells[2][2]) == 0 || (this.cells[0][2] == 0 && this.cells[2][0] == 0))) {
+		cellArrayX = 1;
+		cellArrayY = 2;
 	} else {
-		do {
-			cellArrayX = Math.floor(Math.random() * 3);
-			cellArrayY = Math.floor(Math.random() * 3);
-		} while (this.cells[cellArrayX][cellArrayY] != -1);
-	}*/
+		var nextMove = this.checkNextMove(1);
+
+		if (nextMove != false) {
+			cellArrayX = nextMove[0];
+			cellArrayY = nextMove[1];
+		} else {
+			nextMove = this.checkNextMove(0);
+			if (nextMove != false) {
+				cellArrayX = nextMove[0];
+				cellArrayY = nextMove[1];
+			} else {
+				do {
+					cellArrayX = Math.floor(Math.random() * 3);
+					cellArrayY = Math.floor(Math.random() * 3);
+				} while (this.cells[cellArrayX][cellArrayY] != -1);
+			}
+		}
+	}
 	
 	ThisGameBoard.fillElement(ThisGameBoard.turn, cellArrayX, cellArrayY);
 	this.clickHandler[cellArrayX][cellArrayY].remove();
+}
+
+GameBoard.prototype.checkNextMove = function(turn) {
+	// Check rows and cols
+	for (var i = 0; i < 3; i++) {
+		// Rows
+		if (this.cells[i][0] == turn && this.cells[i][1] == turn && this.cells[i][2] == -1)
+			return [i,2];
+		if (this.cells[i][0] == turn && this.cells[i][2] == turn && this.cells[i][1] == -1)
+			return [i,1];
+		if (this.cells[i][1] == turn && this.cells[i][2] == turn && this.cells[i][0] == -1)
+			return[i,0]
+			
+		// Cols
+		if (this.cells[0][i] == turn && this.cells[1][i] == turn && this.cells[2][i] == -1)
+			return [2,i];
+		if (this.cells[0][i] == turn && this.cells[2][i] == turn && this.cells[1][i] == -1)
+			return [1,i];
+		if (this.cells[1][i] == turn && this.cells[2][i] == turn && this.cells[0][i] == -1)
+			return [0,i];
+	}
+	
+	if (this.cells[0][0] == turn && this.cells[1][1] == turn && this.cells[2][2] == -1)
+		return [2,2];
+	if (this.cells[0][0] == turn && this.cells[2][2] == turn && this.cells[1][1] == -1)
+		return [1,1];
+	if (this.cells[1][1] == turn && this.cells[2][2] == turn && this.cells[0][0] == -1)
+		return [0,0];
+		
+	if (this.cells[0][2] == turn && this.cells[1][1] == turn && this.cells[2][0] == -1)
+		return [2,0];
+	if (this.cells[0][2] == turn && this.cells[2][0] == turn && this.cells[1][1] == -1)
+		return [1,1];
+	if (this.cells[1][1] == turn && this.cells[2][0] == turn && this.cells[0][2] == -1)
+		return [0,2];
+		
+	return false;
+}
+
+GameBoard.prototype.checkEdgeCenter = function() {
+	return (this.cells[0][1] != -1 || this.cells[2][1] != -1 || this.cells[1][0] != -1 || this.cells[1][2] != -1);
+}
+
+GameBoard.prototype.checkCorner = function() {
+	return (this.cells[0][0] != -1 || this.cells[0][2] != -1 || this.cells[2][0] != -1 || this.cells[2][2] != -1);
 }
 
 GameBoard.prototype.dumbAIMakeMove = function() {
