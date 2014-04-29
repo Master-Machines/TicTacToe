@@ -196,7 +196,10 @@ GameBoard.prototype.fillElement = function(turn, x, y) {
 		this.turn = 0;
 		//this.dumbAIMakeMove()
 	}
-	if(this.turn == 1 && this.playing) this.smartAIMakeMove();
+	var superThis = this;
+	if(this.turn == 1 && this.playing) setTimeout(function(){
+		superThis.smartAIMakeMove();
+	}, 500);
 }
 
 GameBoard.prototype.drawCircle = function(x,y) {
