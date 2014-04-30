@@ -432,60 +432,68 @@ GameBoard.prototype.drawCross = function(x,y) {
 GameBoard.prototype.didWin = function(turn) {	
 	// Check top left
 	if (this.cells[0][0] == turn) {
-		// Check left column
+		// Check top row
 		if (this.cells[0][1] == turn && this.cells[0][2] == turn) {
 			this.drawWinLine(0,0,0,2);
+			console.debug("top row");
 			return true;
 		}
-		// Check top row
+		// Check left col
 		if (this.cells[1][0] == turn && this.cells[2][0] == turn) {
 			this.drawWinLine(0,0,2,0);
+			console.debug("left col");
 			return true;
 		}
 		// Check top left to bot right diagonal
 		if (this.cells[1][1] == turn && this.cells[2][2] == turn) {
 			this.drawWinLine(0,0,2,2);
+			console.debug("top left bot right");
 			return true;
 		}
 	}
 	
-	// Check middle left
+	// Check top mid
 	if (this.cells[0][1] == turn) {
-		// Check row
+		// Check col
 		if (this.cells[1][1] == turn && this.cells[2][1] == turn) {
-			this.drawWinLine(0,1,2,1);
-			return true;
-		}
-	}
-	
-	// Check bottom left
-	if (this.cells[0][2] == turn) {
-		// Check bottom row
-		if (this.cells[1][2] == turn && this.cells[2][2] == turn) {
-			this.drawWinLine(0,2,2,2);
-			return true;
-		}
-		// Check bottom left to top right diagonal
-		if (this.cells[1][1] == turn && this.cells[2][0] == turn) {
-			this.drawWinLine(0,2,2,0);
-			return true;
-		}
-	}
-	
-	// Check top middle
-	if (this.cells[1][0] == turn) {
-		// Check middle column
-		if (this.cells[1][1] == turn && this.cells[1][2] == turn) {
-			this.drawWinLine(1,0,1,2);
+			this.drawWinLine(1,0,2,1);
+			console.debug("mid col");
 			return true;
 		}
 	}
 	
 	// Check top right
-	if (this.cells[2][0] == turn) {
-		// Check right column
-		if (this.cells[2][1] == turn && this.cells[2][2] == turn) {
+	if (this.cells[0][2] == turn) {
+		// Check right col
+		if (this.cells[1][2] == turn && this.cells[2][2] == turn) {
 			this.drawWinLine(2,0,2,2);
+			console.debug("right col");
+			return true;
+		}
+		// Check bottom left to top right diagonal
+		if (this.cells[1][1] == turn && this.cells[2][0] == turn) {
+			this.drawWinLine(0,2,0,2);
+			console.debug("top right bot left");
+			return true;
+		}
+	}
+	
+	// Check left mid
+	if (this.cells[1][0] == turn) {
+		// Check row
+		if (this.cells[1][1] == turn && this.cells[1][2] == turn) {
+			this.drawWinLine(0,1,1,2);
+			console.debug("mid row");
+			return true;
+		}
+	}
+	
+	// Check bot left
+	if (this.cells[2][0] == turn) {
+		// Check bot row
+		if (this.cells[2][1] == turn && this.cells[2][2] == turn) {
+			this.drawWinLine(0,2,2,2);
+			console.debug("bot row");
 			return true;
 		}
 	}
@@ -500,8 +508,8 @@ GameBoard.prototype.drawWinLine = function(startX, startY, endX, endY) {
 	var radi = this.width * .015 + this.height * .015;
 	var xPos1 =  this.width * (((startX + 1) * .3) - .1);
 	var yPos1 = this.height * (((startY + 1) * .3) - .1);
-	var xPos2 =  this.width * (((endX + 1) * .3) - .1);
-	var yPos2 = this.height * (((endY + 1) * .3) - .1);
+	var xPos2 =  this.width * (((endY + 1) * .3) - .1);
+	var yPos2 = this.height * (((endX + 1) * .3) - .1);
 	this.paper.path("M" + xPos1 + "," + yPos1 + "L" + xPos2 + "," + yPos2).attr({"stroke" : "#0A0", "stroke-width" : radi});
 }
 
