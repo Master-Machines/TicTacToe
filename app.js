@@ -78,40 +78,64 @@ GameBoard.prototype.stringStartsWith = function(element, str) {
 
 GameBoard.prototype.smartAIMakeMove = function() {
 	var ThisGameBoard = this;
-	var cellArrayX;
-	var cellArrayY;
+	var cellArrayX = -1;
+	var cellArrayY = -1;
 	
-	//var possibleGames = [];
-	//var nextMove = wins[this.gameMoves];
+	// Check for any special cases
+	var move;
+	var specialCase;
+	
+	// Special case 1
+	specialCase = this.checkSpecialCase("54017");
+	if (specialCase != false) {
+		move = this.makeDefinedMove(specialCase, 2, 2);
+		
+		if (this.cells[move[0]][move[1]] == -1) {
+			cellArrayX = move[0];
+			cellArrayY = move[1];
+		}
+	}
 	
 	if (this.gameMoves.length == 1) {
-		if (this.checkEdgeCenter() || this.checkCorner()) {
+		if ((this.checkEdgeCenter() || this.checkCorner()) && this.cells[1][1] == -1) {
+			// If first move is edge or corner take center
 			cellArrayX = 1;
 			cellArrayY = 1;
-		} else {
+		} else if (this.cells[0][0] == -1) {
+			// Else top left
 			cellArrayX = 0;
 			cellArrayY = 0;
 		}
-	} else if (this.gameMoves.length == 3 && ((this.cells[0][0] == 0 && this.cells[2][2]) == 0 || (this.cells[0][2] == 0 && this.cells[2][0] == 0))) {
-		if (this.cells[1][1] == 0) {
-			cellArrayX = 0;
-			cellArrayY = 2;
-		} else {
+	}
+	if (this.gameMoves.length == 3) {
+		if (((this.cells[0][0] == 0 && this.cells[2][2] == 0) || (this.cells[0][2] == 0 && this.cells[2][0] == 0)) && this.cells[1][2] == -1) {
+			// If AI center with player in opposing corners force defense by player
 			cellArrayX = 1;
 			cellArrayY = 2;
+		} else if (this.cells[1][1] == 0 && this.cells[2][2] == 0 && this.cells[0][2] == -1) {
+			// If AI top left and player center and bot right, take bot left
+			cellArrayX = 0;
+			cellArrayY = 2;
 		}
-	} else {
+	}
+	if (cellArrayX == -1 && cellArrayY == -1) {
+		// Check for win
 		var nextMove = this.checkNextMove(1);
 
 		if (nextMove != false) {
+			// If win exists, take it
 			cellArrayX = nextMove[0];
 			cellArrayY = nextMove[1];
 		} else {
+			// Else check for block
 			nextMove = this.checkNextMove(0);
+			
 			if (nextMove != false) {
+				// If block exists, take it
 				cellArrayX = nextMove[0];
 				cellArrayY = nextMove[1];
 			} else {
+				// Else random move
 				do {
 					cellArrayX = Math.floor(Math.random() * 3);
 					cellArrayY = Math.floor(Math.random() * 3);
@@ -122,6 +146,210 @@ GameBoard.prototype.smartAIMakeMove = function() {
 	
 	ThisGameBoard.fillElement(ThisGameBoard.turn, cellArrayX, cellArrayY);
 	this.clickHandler[cellArrayX][cellArrayY].remove();
+}
+
+GameBoard.prototype.makeDefinedMove = function(flipRot, x, y) {
+	// Alter pos by flip case
+	switch (flipRot[0]) {
+		case 1: // x flip
+			x = 2 - x;
+			break;
+		case 2: // y flip
+			y = 2 - y;
+			break;
+		case 3: // xy flip
+			x = 2 - x;
+			y = 2 - y;
+			break;
+	}
+	
+	// Alter pos by rot case
+	switch (flipRot[1]) {
+		case 1: // 90cw
+			var temp = x;
+			x = y;
+			y = 2 - temp;
+			break;
+		case 2: // 180cw
+			var temp = x;
+			x = 2 - y;
+			y = temp;
+			break;
+		case 3: // 270cw
+			var temp = x;
+			x = 2 - y;
+			y = 2 - temp;
+			break;
+	}
+	
+	// Return altered pos
+	return [x,y];
+}
+
+GameBoard.prototype.checkSpecialCase = function(board) {
+	// Define rotated boards
+	var rot090 = new Array(3);
+	var rot180 = new Array(3);
+	var rot270 = new Array(3);
+	
+	// Create 2D array for each board
+	for (var i = 0; i < rot090.length; i++) {
+		rot090[i] = new Array(3);
+		rot180[i] = new Array(3);
+		rot270[i] = new Array(3);
+	}
+	
+	// Set to empty board
+	for (var col = 0; col < 3; col++) {
+		for (var row = 0; row < 3; row++) {
+			rot090[row][col] = -1;
+			rot180[col][row] = -1;
+			rot270[row][col] = -1;
+		}
+	}
+	
+	// Set rotated moves for each board
+	for (var col = 0; col < 3; col++) {
+		for (var row = 0; row < 3; row++) {
+			rot090[row][2 - col] = this.cells[row][col];
+			rot180[2 - col][2 - row] = this.cells[row][col];
+			rot270[2 - row][col] = this.cells[row][col];
+		}
+	}
+	
+	// Used if current flip doesn't work
+	var didBreak = false;
+	
+	// Compare original case to normal board
+	norm: for (var i = 0; i < board.length; i++) {
+		// Set original pos for normal board
+		var x = Math.floor(parseInt(board.charAt(i)) % 3);
+		var y = Math.floor(parseInt(board.charAt(i)) / 3);
+		
+		if (this.cells[x][y] != i % 2 && // Normal
+			rot090[x][y] != i % 2 &&
+			rot180[x][y] != i % 2 &&
+			rot270[x][y] != i % 2) {
+			didBreak = true;
+			break norm;
+			//goto xflip;
+			}
+	}
+	
+	if (!didBreak) return this.checkRot(rot090, rot180, rot270, 0);
+	
+	didBreak = false;
+	
+	// Compare original case to x flip board
+	xflip: for (var i = 0; i < board.length; i++) {
+		// Set original pos for normal board
+		var x = Math.floor(parseInt(board.charAt(i)) % 3);
+		var y = Math.floor(parseInt(board.charAt(i)) / 3);
+		
+		if (this.cells[2 - x][y] != i % 2 && // X flip
+			rot090[2 - x][y] != i % 2 &&
+			rot180[2 - x][y] != i % 2 &&
+			rot270[2 - x][y] != i % 2) {
+			didBreak = true;
+			break xflip;
+			//goto yflip;
+		}
+	}
+	
+	if (!didBreak) return this.checkRot(rot090, rot180, rot270, 1);
+	
+	didBreak = false;
+	
+	// Compare original case to y flip board
+	yflip: for (var i = 0; i < board.length; i++) {
+		// Set original pos for normal board
+		var x = Math.floor(parseInt(board.charAt(i)) % 3);
+		var y = Math.floor(parseInt(board.charAt(i)) / 3);
+		
+		if (this.cells[x][2 - y] != i % 2 && // Y flip
+			rot090[x][2 - y] != i % 2 &&
+			rot180[x][2 - y] != i % 2 &&
+			rot270[x][2 - y] != i % 2) {
+			didBreak = true;
+			break yflip;
+			//goto xyflip;
+		}
+	}
+	
+	if (!didBreak) return this.checkRot(rot090, rot180, rot270, 2);
+	
+	// Compare original case to xy flip board
+	xyflip: for (var i = 0; i < board.length; i++) {
+		// Set original pos for normal board
+		var x = Math.floor(parseInt(board.charAt(i)) % 3);
+		var y = Math.floor(parseInt(board.charAt(i)) / 3);
+		
+		if (this.cells[2 - x][2 - y] != i % 2 && // XY flip
+			rot090[2 - x][2 - y] != i % 2 &&
+			rot180[2 - x][2 - y] != i % 2 &&
+			rot270[2 - x][2 - y] != i % 2)
+			return false;
+	}
+	
+	return this.checkRot(rot090, rot180, rot270, 3);
+}
+
+GameBoard.prototype.checkRot = function(a, b, c, flip) {
+	// Find rotation of current board relative to original move
+	var aFail = false;
+	var bFail = false;
+	var cFail = false;
+	
+	// Check rotations with flips
+	// a-90cw, b-180cw, c-270cw
+	switch (flip) {
+		case 0: // No flip
+			for (var col = 0; col < 3; col++) {
+				for (var row = 0; row < 3; row++) {
+					if (a[row][col] != this.cells[row][col] && !aFail) aFail = true;
+					if (b[row][col] != this.cells[row][col] && !bFail) bFail = true;
+					if (c[row][col] != this.cells[row][col] && !cFail) cFail = true;
+				}
+			}
+			break;
+		case 1: // X flip
+			for (var col = 0; col < 3; col++) {
+				for (var row = 0; row < 3; row++) {
+					if (a[2 - row][col] != this.cells[row][col] && !aFail) aFail = true;
+					if (b[2 - row][col] != this.cells[row][col] && !bFail) bFail = true;
+					if (c[2 - row][col] != this.cells[row][col] && !cFail) cFail = true;
+				}
+			}
+			break;
+		case 2: // Y flip
+			for (var col = 0; col < 3; col++) {
+				for (var row = 0; row < 3; row++) {
+					if (a[row][2 - col] != this.cells[row][col] && !aFail) aFail = true;
+					if (b[row][2 - col] != this.cells[row][col] && !bFail) bFail = true;
+					if (c[row][2 - col] != this.cells[row][col] && !cFail) cFail = true;
+				}
+			}
+			break;
+		case 3: // XY flip
+			for (var col = 0; col < 3; col++) {
+				for (var row = 0; row < 3; row++) {
+					if (a[2 - row][2 - col] != this.cells[row][col] && !aFail) aFail = true;
+					if (b[2 - row][2 - col] != this.cells[row][col] && !bFail) bFail = true;
+					if (c[2 - row][2 - col] != this.cells[row][col] && !cFail) cFail = true;
+				}
+			}
+			break;
+	}
+	
+	// Returns flip and rotation value of matching board
+	if (!aFail)
+		return [flip, 1];
+	else if (!bFail)
+		return [flip, 2];
+	else if (!cFail)
+		return [flip, 3];
+	else // Returns normal board if all else fail
+		return [flip, 0];
 }
 
 GameBoard.prototype.checkNextMove = function(turn) {
