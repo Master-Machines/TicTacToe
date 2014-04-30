@@ -86,13 +86,26 @@ GameBoard.prototype.smartAIMakeMove = function() {
 	var specialCase;
 	
 	// Special case 1
-	specialCase = this.checkSpecialCase("54017");
+	/*specialCase = this.checkSpecialCase("54017");
 	if (specialCase != false) {
 		move = this.makeDefinedMove(specialCase, 2, 2);
-		
+		console.debug("is a special case");
 		if (this.cells[move[0]][move[1]] == -1) {
 			cellArrayX = move[0];
 			cellArrayY = move[1];
+			console.debug("blocking special case 1");
+		}
+	}*/
+	
+	// Special case 1
+	specialCase = this.checkSpecialCase("540");
+	if (specialCase != false) {
+		move = this.makeDefinedMove(specialCase, 2, 0);
+		console.debug("is a special case");
+		if (this.cells[move[0]][move[1]] == -1) {
+			cellArrayX = move[0];
+			cellArrayY = move[1];
+			console.debug("blocking special case 1");
 		}
 	}
 	
