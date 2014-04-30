@@ -82,7 +82,6 @@ GameBoard.prototype.smartAIMakeMove = function() {
 	var cellArrayY = -1;
 	
 	// Check for any special cases
-	var move;
 	var specialCase;
 
 	specialCase = this.checkSpecialCase("540");
@@ -158,6 +157,7 @@ GameBoard.prototype.smartAIMakeMove = function() {
 }
 
 GameBoard.prototype.orientSolution = function(x, y, orientation) {
+	// Flip pos to match board orientation
 	switch (orientation[0]) {
 		case 1:
 			y = 2 - y;
@@ -173,6 +173,7 @@ GameBoard.prototype.orientSolution = function(x, y, orientation) {
 			break;
 	}
 	
+	// Rotate pos to match board orientation
 	switch (orientation[1]) {
 		case 1:
 			if (x == 0) {
@@ -217,8 +218,10 @@ GameBoard.prototype.orientSolution = function(x, y, orientation) {
 }
 
 GameBoard.prototype.checkSpecialCase = function(caseMoves) {
+	// Build case board
 	var caseBoard = [[-1,-1,-1],[-1,-1,-1],[-1,-1,-1]];
 	
+	// Set board to special case
 	for (var i = 0; i < caseMoves.length; i++) {
 		var move = parseInt(caseMoves.charAt(i));
 		var x = Math.floor(move / 3);
@@ -227,6 +230,7 @@ GameBoard.prototype.checkSpecialCase = function(caseMoves) {
 		caseBoard[x][y] = i % 2;
 	}
 	
+	// Check for matching flip and rotation
 	for (var flip = 0; flip < 4; flip++) {
 		var tempBoard = this.getFlippedBoard(flip, caseBoard);
 		
@@ -244,15 +248,17 @@ GameBoard.prototype.checkSpecialCase = function(caseMoves) {
 				}
 			}
 			
-			if (isThisOrientation)
+			if (isThisOrientation) // Returns info to orient solution
 				return [flip, rot];
 		}
 	}
 	
+	// Returns false if no match;
 	return false;
 }
 
 GameBoard.prototype.getRotatedBoard = function(array) {
+	// Returns board that is rotated 90 degrees cw
 	var rotated90 = [[-1,-1,-1],[-1,-1,-1],[-1,-1,-1]];
 	rotated90[0][0] = array[2][0];
 	rotated90[0][1] = array[1][0];
@@ -270,9 +276,11 @@ GameBoard.prototype.getRotatedBoard = function(array) {
 }
 
 GameBoard.prototype.getFlippedBoard = function(flip, array) {
+	// Returns flipped board
 	var flipped = [[-1,-1,-1],[-1,-1,-1],[-1,-1,-1]];
 	
 	if (flip == 1) {
+		// Flipped over x axis
 		flipped[0][0] = array[0][2];
 		flipped[0][1] = array[0][1];
 		flipped[0][2] = array[0][0];
@@ -285,6 +293,7 @@ GameBoard.prototype.getFlippedBoard = function(flip, array) {
 		flipped[2][1] = array[2][1];
 		flipped[2][2] = array[2][0];
 	} else if (flip == 2) {
+		// Flipped x and y
 		flipped[0][0] = array[2][2];
 		flipped[0][1] = array[2][1];
 		flipped[0][2] = array[2][0];
@@ -296,18 +305,8 @@ GameBoard.prototype.getFlippedBoard = function(flip, array) {
 		flipped[2][0] = array[0][2];
 		flipped[2][1] = array[0][1];
 		flipped[2][2] = array[0][0];
-		/*flipped[0][0] = array[2][0];
-		flipped[0][1] = array[2][1];
-		flipped[0][2] = array[2][2];
-		
-		flipped[1][0] = array[1][0];
-		flipped[1][1] = array[1][1];
-		flipped[1][2] = array[1][2];
-		
-		flipped[2][0] = array[0][0];
-		flipped[2][1] = array[0][1];
-		flipped[2][2] = array[0][2];*/
 	} else if (flip == 3) {
+		// Flipped over x and y axis
 		flipped[0][0] = array[0][0];
 		flipped[0][1] = array[1][0];
 		flipped[0][2] = array[2][0];
@@ -319,17 +318,6 @@ GameBoard.prototype.getFlippedBoard = function(flip, array) {
 		flipped[2][0] = array[0][2];
 		flipped[2][1] = array[1][2];
 		flipped[2][2] = array[2][2];
-		/*flipped[0][0] = array[2][2];
-		flipped[0][1] = array[2][1];
-		flipped[0][2] = array[2][0];
-		
-		flipped[1][0] = array[1][2];
-		flipped[1][1] = array[1][1];
-		flipped[1][2] = array[1][0];
-		
-		flipped[2][0] = array[0][2];
-		flipped[2][1] = array[0][1];
-		flipped[2][2] = array[0][0];*/
 	} else {
 		flipped = array;
 	}
