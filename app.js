@@ -84,12 +84,22 @@ GameBoard.prototype.smartAIMakeMove = function() {
 	//var possibleGames = [];
 	//var nextMove = wins[this.gameMoves];
 	
-	if (this.gameMoves.length == 1 && (this.checkEdgeCenter() || this.checkCorner())) {
-		cellArrayX = 1;
-		cellArrayY = 1;
+	if (this.gameMoves.length == 1) {
+		if (this.checkEdgeCenter() || this.checkCorner()) {
+			cellArrayX = 1;
+			cellArrayY = 1;
+		} else {
+			cellArrayX = 0;
+			cellArrayY = 0;
+		}
 	} else if (this.gameMoves.length == 3 && ((this.cells[0][0] == 0 && this.cells[2][2]) == 0 || (this.cells[0][2] == 0 && this.cells[2][0] == 0))) {
-		cellArrayX = 1;
-		cellArrayY = 2;
+		if (this.cells[1][1] == 0) {
+			cellArrayX = 0;
+			cellArrayY = 2;
+		} else {
+			cellArrayX = 1;
+			cellArrayY = 2;
+		}
 	} else {
 		var nextMove = this.checkNextMove(1);
 
