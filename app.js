@@ -21,7 +21,7 @@ function GameBoard() {
 	this.crosses = [];
 	this.cellSpaces = [];
 	this.drawBoard();
-	//this.dumbAIMakeMove();
+	//this.smartAIMakeMove();
 }
 
 GameBoard.prototype.drawBoard = function() {
@@ -128,7 +128,7 @@ GameBoard.prototype.smartAIMakeMove = function() {
 	}
 	if (cellArrayX == -1 && cellArrayY == -1) {
 		// Check for win
-		var nextMove = this.checkNextMove(1);
+		var nextMove = this.checkNextMove(this.turn);
 
 		if (nextMove != false) {
 			// If win exists, take it
@@ -136,7 +136,7 @@ GameBoard.prototype.smartAIMakeMove = function() {
 			cellArrayY = nextMove[1];
 		} else {
 			// Else check for block
-			nextMove = this.checkNextMove(0);
+			nextMove = this.checkNextMove((this.turn + 1) % 2);
 			
 			if (nextMove != false) {
 				// If block exists, take it
@@ -408,12 +408,16 @@ GameBoard.prototype.fillElement = function(turn, x, y) {
 	if(this.turn == 2 && this.playing)
 	{ 
 		this.turn = 0;
-		//this.dumbAIMakeMove()
+		//this.smartAIMakeMove()
 	}
 	var superThis = this;
 	if(this.turn == 1 && this.playing) setTimeout(function(){
 		superThis.smartAIMakeMove();
 	}, 500);
+	//if(this.turn == 1 && this.playing)
+	//{
+	//	this.smartAIMakeMove();
+	//}
 }
 
 GameBoard.prototype.drawCircle = function(x,y) {
@@ -434,19 +438,19 @@ GameBoard.prototype.didWin = function(turn) {
 	if (this.cells[0][0] == turn) {
 		// Check top row
 		if (this.cells[0][1] == turn && this.cells[0][2] == turn) {
-			this.drawWinLine(0,0,0,2);
+			//this.drawWinLine(0,0,0,2);
 			console.debug("top row");
 			return true;
 		}
 		// Check left col
 		if (this.cells[1][0] == turn && this.cells[2][0] == turn) {
-			this.drawWinLine(0,0,2,0);
+			//this.drawWinLine(0,0,2,0);
 			console.debug("left col");
 			return true;
 		}
 		// Check top left to bot right diagonal
 		if (this.cells[1][1] == turn && this.cells[2][2] == turn) {
-			this.drawWinLine(0,0,2,2);
+			//this.drawWinLine(0,0,2,2);
 			console.debug("top left bot right");
 			return true;
 		}
@@ -456,7 +460,7 @@ GameBoard.prototype.didWin = function(turn) {
 	if (this.cells[0][1] == turn) {
 		// Check col
 		if (this.cells[1][1] == turn && this.cells[2][1] == turn) {
-			this.drawWinLine(1,0,2,1);
+			//this.drawWinLine(1,0,2,1);
 			console.debug("mid col");
 			return true;
 		}
@@ -466,13 +470,13 @@ GameBoard.prototype.didWin = function(turn) {
 	if (this.cells[0][2] == turn) {
 		// Check right col
 		if (this.cells[1][2] == turn && this.cells[2][2] == turn) {
-			this.drawWinLine(2,0,2,2);
+			//this.drawWinLine(2,0,2,2);
 			console.debug("right col");
 			return true;
 		}
 		// Check bottom left to top right diagonal
 		if (this.cells[1][1] == turn && this.cells[2][0] == turn) {
-			this.drawWinLine(0,2,0,2);
+			//this.drawWinLine(0,2,0,2);
 			console.debug("top right bot left");
 			return true;
 		}
@@ -482,7 +486,7 @@ GameBoard.prototype.didWin = function(turn) {
 	if (this.cells[1][0] == turn) {
 		// Check row
 		if (this.cells[1][1] == turn && this.cells[1][2] == turn) {
-			this.drawWinLine(0,1,1,2);
+			//this.drawWinLine(0,1,1,2);
 			console.debug("mid row");
 			return true;
 		}
@@ -492,7 +496,7 @@ GameBoard.prototype.didWin = function(turn) {
 	if (this.cells[2][0] == turn) {
 		// Check bot row
 		if (this.cells[2][1] == turn && this.cells[2][2] == turn) {
-			this.drawWinLine(0,2,2,2);
+			//this.drawWinLine(0,2,2,2);
 			console.debug("bot row");
 			return true;
 		}
@@ -527,10 +531,37 @@ GameBoard.prototype.checkTie = function() {
 	{
 		console.debug("Tie");
 		this.playing = false;
+		this.reset();
 	}
 }
 
 GameBoard.prototype.endGame = function(shape) {
 	console.debug("Player ", shape, " Wins!");
 	this.playing = false;
+	this.reset();
+}
+
+GameBoard.prototype.reset = function() {
+	this.cells = [[-1, -1, -1],[-1, -1, -1],[-1, -1, -1]];
+	this.playing = true;
+	this.turn = 0;
+	this.gameMoves = "";
+	
+	for(i = 0; i < this.circles.length; i++)
+	{
+		//console.debug(this.circles[i]);
+		this.circles[i].paper.remove();
+		this.circles.splice(i, 1);
+	}
+	for(i = 0; i < this.crosses.length; i++)
+	{
+		this.crosses[i].paper.remove();
+		this.crosses.splice(i, 1);
+	}
+	for(i = 0; i < this.cellSpaces.length; i++)
+	{
+		this.cellSpaces.splice(i, 1);
+	}
+	
+	this.drawBoard();
 }
