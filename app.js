@@ -8,7 +8,7 @@ $(function() {
 function GameBoard() {
 	$("#loading").remove();
 	this.cells = [[-1, -1, -1],[-1, -1, -1],[-1, -1, -1]];
-	this.clickHandler = new Array(3);
+	this.clickHandler = [[-1, -1, -1],[-1, -1, -1],[-1, -1, -1]];
 	this.numPlayers = 0;
 	this.playing = true;
 	this.turn = 0;
@@ -24,9 +24,7 @@ function GameBoard() {
 }
 
 GameBoard.prototype.drawBoard = function() {
-	for(var i = 0; i < this.clickHandler.length; i++) {
-		this.clickHandler[i] = new Array(3);
-	}
+	this.clickHandler = [[-1, -1, -1],[-1, -1, -1],[-1, -1, -1]];
 	
 	this.gameMoves = "";
 	
@@ -549,13 +547,20 @@ GameBoard.prototype.reset = function() {
 	this.turn = 0;
 	this.gameMoves = "";
 	
-	for(i = 0; i < this.circles.length; i++)
+	for(var i = 0; i < this.circles.length; i++)
 	{
 		this.circles[i].remove();
 	}
-	for(i = 0; i < this.crosses.length; i++)
+	for(var i = 0; i < this.crosses.length; i++)
 	{
 		this.crosses[i].remove();
+	}
+	for (var i = 0; i < this.clickHandler.length; i++)
+	{
+		for (var j = 0; j < this.clickHandler[i].length; j++)
+		{
+			this.clickHandler[i][j].remove();
+		}
 	}
 	
 	this.drawBoard();
