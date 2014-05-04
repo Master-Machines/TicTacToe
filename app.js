@@ -19,7 +19,6 @@ function GameBoard() {
 	this.gameMoves = "";
 	this.circles = [];
 	this.crosses = [];
-	this.cellSpaces = [];
 	this.drawBoard();
 	//this.smartAIMakeMove();
 }
@@ -531,14 +530,17 @@ GameBoard.prototype.checkTie = function() {
 	{
 		console.debug("Tie");
 		this.playing = false;
-		this.reset();
+		
+		var superThis = this;
+		setTimeout(function(){superThis.reset();}, 500);
 	}
 }
 
 GameBoard.prototype.endGame = function(shape) {
 	console.debug("Player ", shape, " Wins!");
 	this.playing = false;
-	this.reset();
+	var superThis = this;
+	setTimeout(function(){superThis.reset();}, 500);
 }
 
 GameBoard.prototype.reset = function() {
@@ -549,18 +551,11 @@ GameBoard.prototype.reset = function() {
 	
 	for(i = 0; i < this.circles.length; i++)
 	{
-		//console.debug(this.circles[i]);
-		this.circles[i].paper.remove();
-		this.circles.splice(i, 1);
+		this.circles[i].remove();
 	}
 	for(i = 0; i < this.crosses.length; i++)
 	{
-		this.crosses[i].paper.remove();
-		this.crosses.splice(i, 1);
-	}
-	for(i = 0; i < this.cellSpaces.length; i++)
-	{
-		this.cellSpaces.splice(i, 1);
+		this.crosses[i].remove();
 	}
 	
 	this.drawBoard();
