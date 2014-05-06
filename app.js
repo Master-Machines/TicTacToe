@@ -30,12 +30,12 @@ GameBoard.prototype.drawBoard = function() {
 	
 	this.paper = Raphael(0, 0, this.width, this.height);
 	this.lines = [];
-	this.lines.push(this.paper.rect(this.width * .333 - this.lineWidth/2, 0, this.lineWidth, this.height));
-	this.lines.push(this.paper.rect(this.width * .666 - this.lineWidth/2, 0, this.lineWidth, this.height));
-	this.lines.push(this.paper.rect(0, this.height * .333 - this.lineWidth/2, this.width, this.lineWidth));
-	this.lines.push(this.paper.rect(0, this.height * .666 - this.lineWidth/2, this.width, this.lineWidth));
-	this.lines.forEach(function(line) {
-		line.attr({fill : "#333", "stroke-width" : "0"});
+	this.lines.push(this.paper.rect(this.width * .333 - this.lineWidth/2, 0, this.lineWidth, this.height).attr({fill : "#333", "stroke-width" : "5", "fill-opacity" : 0}));
+	this.lines.push(this.paper.rect(this.width * .666 - this.lineWidth/2, 0, this.lineWidth, this.height).attr({fill : "#333", "stroke-width" : "5", "fill-opacity" : 0}));
+	this.lines.push(this.paper.rect(0, this.height * .333 - this.lineWidth/2, this.width, this.lineWidth).attr({fill : "#333", "stroke-width" : "5", "fill-opacity" : 0}));
+	this.lines.push(this.paper.rect(0, this.height * .666 - this.lineWidth/2, this.width, this.lineWidth).attr({fill : "#333", "stroke-width" : "5", "fill-opacity" : 0}));
+	this.lines.forEach(function(line, index) {
+		line.animate({"fill-opacity" : 1, "stroke-opacity" : .2}, 1000);
 	});
 	this.createCells();
 	// this.fillElement(1,0,0);
@@ -61,10 +61,16 @@ GameBoard.prototype.createCells = function() {
 
 GameBoard.prototype.createCell = function(x, y, cellArrayX, cellArrayY) {
 	var ThisGameBoard = this;
-	this.clickHandler[cellArrayX][cellArrayY] = this.paper.circle(parseInt(x), parseInt(y), parseInt(this.width * .028 + this.height * .03)).attr({"stroke-width" : "0", "fill" : "#CCC", "cursor" : "pointer"}).mousedown(function() {
+	var length = parseInt(this.width * .04 + this.height * .045);
+	this.clickHandler[cellArrayX][cellArrayY] = this.paper.rect(parseInt(x), parseInt(y), 1, 1).attr({"stroke-width" : "0", "fill" : "#CCC", "cursor" : "pointer"}).mousedown(function() {
 		ThisGameBoard.fillElement(ThisGameBoard.turn, cellArrayX, cellArrayY);
 		this.remove();
-	});
+	}).animate({x : parseInt(x - length/2), y : parseInt(y - length/2), width : length, height : length}, 800)
+		.mouseover(function() {
+			this.animate({"stroke-width" : "3"}, 200);
+		}).mouseout(function() {
+			this.animate({"stroke-width" : "0"}, 200);
+		});
 }
 
 GameBoard.prototype.stringStartsWith = function(element, str) {
@@ -435,19 +441,19 @@ GameBoard.prototype.didWin = function(turn) {
 	if (this.cells[0][0] == turn) {
 		// Check top row
 		if (this.cells[0][1] == turn && this.cells[0][2] == turn) {
-			//this.drawWinLine(0,0,0,2);
+			this.drawWinLine(0,0,0,2);
 			console.debug("top row");
 			return true;
 		}
 		// Check left col
 		if (this.cells[1][0] == turn && this.cells[2][0] == turn) {
-			//this.drawWinLine(0,0,2,0);
+			this.drawWinLine(0,0,2,0);
 			console.debug("left col");
 			return true;
 		}
 		// Check top left to bot right diagonal
 		if (this.cells[1][1] == turn && this.cells[2][2] == turn) {
-			//this.drawWinLine(0,0,2,2);
+			this.drawWinLine(0,0,2,2);
 			console.debug("top left bot right");
 			return true;
 		}
@@ -457,7 +463,7 @@ GameBoard.prototype.didWin = function(turn) {
 	if (this.cells[0][1] == turn) {
 		// Check col
 		if (this.cells[1][1] == turn && this.cells[2][1] == turn) {
-			//this.drawWinLine(1,0,2,1);
+			this.drawWinLine(1,0,2,1);
 			console.debug("mid col");
 			return true;
 		}
@@ -467,13 +473,13 @@ GameBoard.prototype.didWin = function(turn) {
 	if (this.cells[0][2] == turn) {
 		// Check right col
 		if (this.cells[1][2] == turn && this.cells[2][2] == turn) {
-			//this.drawWinLine(2,0,2,2);
+			this.drawWinLine(2,0,2,2);
 			console.debug("right col");
 			return true;
 		}
 		// Check bottom left to top right diagonal
 		if (this.cells[1][1] == turn && this.cells[2][0] == turn) {
-			//this.drawWinLine(0,2,0,2);
+			this.drawWinLine(0,2,0,2);
 			console.debug("top right bot left");
 			return true;
 		}
@@ -483,7 +489,7 @@ GameBoard.prototype.didWin = function(turn) {
 	if (this.cells[1][0] == turn) {
 		// Check row
 		if (this.cells[1][1] == turn && this.cells[1][2] == turn) {
-			//this.drawWinLine(0,1,1,2);
+			this.drawWinLine(0,1,1,2);
 			console.debug("mid row");
 			return true;
 		}
@@ -493,7 +499,7 @@ GameBoard.prototype.didWin = function(turn) {
 	if (this.cells[2][0] == turn) {
 		// Check bot row
 		if (this.cells[2][1] == turn && this.cells[2][2] == turn) {
-			//this.drawWinLine(0,2,2,2);
+			this.drawWinLine(0,2,2,2);
 			console.debug("bot row");
 			return true;
 		}
@@ -511,7 +517,7 @@ GameBoard.prototype.drawWinLine = function(startX, startY, endX, endY) {
 	var yPos1 = this.height * (((startY + 1) * .3) - .1);
 	var xPos2 =  this.width * (((endY + 1) * .3) - .1);
 	var yPos2 = this.height * (((endX + 1) * .3) - .1);
-	this.paper.path("M" + xPos1 + "," + yPos1 + "L" + xPos2 + "," + yPos2).attr({"stroke" : "#0A0", "stroke-width" : radi});
+	this.winLine = this.paper.path("M" + xPos1 + "," + yPos1 + "L" + xPos2 + "," + yPos2).attr({"stroke" : "#0A0", "stroke-width" : radi});
 }
 
 GameBoard.prototype.checkTie = function() {
@@ -530,7 +536,7 @@ GameBoard.prototype.checkTie = function() {
 		this.playing = false;
 		
 		var superThis = this;
-		setTimeout(function(){superThis.reset();}, 500);
+		setTimeout(function(){superThis.reset();}, 750);
 	}
 }
 
@@ -538,7 +544,10 @@ GameBoard.prototype.endGame = function(shape) {
 	console.debug("Player ", shape, " Wins!");
 	this.playing = false;
 	var superThis = this;
-	setTimeout(function(){superThis.reset();}, 500);
+	setTimeout(function() {
+		superThis.winLine.remove();
+		superThis.reset();
+	}, 750);
 }
 
 GameBoard.prototype.reset = function() {
@@ -546,7 +555,10 @@ GameBoard.prototype.reset = function() {
 	this.playing = true;
 	this.turn = 0;
 	this.gameMoves = "";
-	
+	for(var i = 0; i < this.lines.length; i++)
+	{
+		this.lines[i].remove();
+	}
 	for(var i = 0; i < this.circles.length; i++)
 	{
 		this.circles[i].remove();
